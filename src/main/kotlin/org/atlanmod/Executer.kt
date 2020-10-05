@@ -18,9 +18,8 @@ class Executer {
         request.goals = args.toList()
 
         val invoker: Invoker = DefaultInvoker()
-        if (System.getProperty("maven.home") == null)
-            invoker.mavenHome = File("/usr/share/maven")
-
+        //if (System.getProperty("maven.home") == null)
+        //    invoker.mavenHome = File("/usr/share/maven") FIXME
 
         invoker.execute(request)
     }

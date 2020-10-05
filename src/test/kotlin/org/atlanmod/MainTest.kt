@@ -1,9 +1,15 @@
 package org.atlanmod
 
+import org.atlanmod.trace.TracerImpl
 import org.junit.Test
 import spoon.Launcher
+import spoon.reflect.declaration.CtClass
+import spoon.reflect.declaration.CtElement
+import spoon.reflect.declaration.CtMethod
+import spoon.reflect.declaration.CtNamedElement
 import java.io.File
 import java.nio.file.Files
+import kotlin.reflect.full.isSubclassOf
 
 class MainTest {
 
@@ -27,8 +33,6 @@ class MainTest {
         }
 
         println(ctClass1.toString())
-
-
     }
 
     @Test
@@ -43,7 +47,7 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeStatements(SimpleTraceTracer())
+                .beforeStatements(TracerImpl())
                 .build()
                 .instrument()
     }
@@ -59,7 +63,7 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeMethods(SimpleTraceTracer())
+                .beforeMethods(TracerImpl())
                 .build()
                 .instrument()
 
@@ -77,7 +81,7 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeMethods(SimpleTraceTracer())
+                .beforeMethods(TracerImpl())
                 .build()
                 .instrument()
 
@@ -96,8 +100,8 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeStatements(SimpleTraceTracer())
-                .afterMethods(SimpleTraceTracer())
+                .beforeStatements(TracerImpl())
+                .afterMethods(TracerImpl())
                 .build()
                 .instrument()
 

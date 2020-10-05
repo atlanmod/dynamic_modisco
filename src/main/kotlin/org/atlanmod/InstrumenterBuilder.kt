@@ -1,15 +1,16 @@
 package org.atlanmod
 
+import org.atlanmod.trace.Tracer
 import java.io.File
 
 class InstrumenterBuilder {
     private var instrumenter : Instrumenter = Instrumenter()
     private lateinit var directory: File
     private lateinit var target: File
-    var beforeMethodProcessors : ArrayList<Tracer> = ArrayList()
-    var beforeStatementProcessors : ArrayList<Tracer> = ArrayList()
-    var afterMethodProcessors : ArrayList<Tracer> = ArrayList()
-    var afterStatementProcessors : ArrayList<Tracer> = ArrayList()
+    var beforeMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var beforeStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var afterMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var afterStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
     private val dependencies : ArrayList<File> = ArrayList()
 
     fun onProject(directory: File) : InstrumenterBuilder {
@@ -22,22 +23,22 @@ class InstrumenterBuilder {
         return this
     }
 
-    fun beforeMethods(tracer: Tracer) : InstrumenterBuilder {
+    fun beforeMethods(tracer: Tracer<Any>) : InstrumenterBuilder {
         beforeMethodProcessors.add(tracer)
         return this
     }
 
-    fun afterMethods(tracer: Tracer) : InstrumenterBuilder {
+    fun afterMethods(tracer: Tracer<Any>) : InstrumenterBuilder {
         afterMethodProcessors.add(tracer)
         return this
     }
 
-    fun beforeStatements(tracer: Tracer) : InstrumenterBuilder {
+    fun beforeStatements(tracer: Tracer<Any>) : InstrumenterBuilder {
         beforeStatementProcessors.add(tracer)
         return this
     }
 
-    fun afterStatements(tracer: Tracer) : InstrumenterBuilder {
+    fun afterStatements(tracer: Tracer<Any>) : InstrumenterBuilder {
         afterStatementProcessors.add(tracer)
         return this
     }

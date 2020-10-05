@@ -4,24 +4,27 @@ import org.apache.commons.io.FileUtils
 import org.apache.maven.model.Dependency
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer
+import org.atlanmod.trace.Tracer
 import spoon.Launcher
 import spoon.MavenLauncher
-import spoon.OutputType
 import spoon.processing.AbstractProcessor
 import spoon.reflect.code.CtStatement
 import spoon.reflect.code.CtStatementList
+import spoon.reflect.declaration.CtClass
 import spoon.reflect.declaration.CtMethod
+import spoon.reflect.declaration.CtNamedElement
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileWriter
+import kotlin.reflect.full.isSubclassOf
 
 class Instrumenter {
     lateinit var directory: File
     lateinit var target: File
-    var beforeMethodProcessors : ArrayList<Tracer> = ArrayList()
-    var beforeStatementProcessors : ArrayList<Tracer> = ArrayList()
-    var afterMethodProcessors : ArrayList<Tracer> = ArrayList()
-    var afterStatementProcessors : ArrayList<Tracer> = ArrayList()
+    var beforeMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var beforeStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var afterMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    var afterStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
     var dependencies : ArrayList<File> = ArrayList()
 
     fun instrument() {
@@ -40,8 +43,8 @@ class Instrumenter {
                 override fun process(method: CtMethod<Any>?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${method?.signature}\")")
-                        method?.body?.insertBegin<CtStatementList>(instrumentedStatement)
+                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${qualifiedName(method!!)}\")")
+                        method.body?.insertBegin<CtStatementList>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)
                         println("Could not instrument ${method?.simpleName}")
@@ -69,8 +72,8 @@ class Instrumenter {
                 override fun process(method: CtMethod<Any>?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${method?.signature}\")")
-                        method?.body?.insertEnd<CtStatementList>(instrumentedStatement)
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${qualifiedName(method!!)}\")")
+                        method.body?.insertEnd<CtStatementList>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)
                         println("Could not instrument ${method?.simpleName}")
@@ -108,5 +111,17 @@ class Instrumenter {
         }
 
         launcher.run()
+    }
+
+
+    /**
+     * Recursive: get qualified name of method of class
+     */
+    private fun qualifiedName(elem: CtNamedElement): String {
+        return when {
+            elem::class.isSubclassOf(CtMethod::class) -> "${qualifiedName((elem as CtMethod<*>).parent as CtNamedElement)}#${(elem as CtMethod<*>).simpleName}"
+            elem::class.isSubclassOf(CtClass::class) -> (elem as CtClass<*>).qualifiedName
+            else -> ""
+        }
     }
 }

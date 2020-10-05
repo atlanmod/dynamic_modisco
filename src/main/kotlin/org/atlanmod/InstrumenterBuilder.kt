@@ -12,7 +12,6 @@ class InstrumenterBuilder {
     var afterStatementProcessors : ArrayList<Tracer> = ArrayList()
     private val dependencies : ArrayList<File> = ArrayList()
 
-
     fun onProject(directory: File) : InstrumenterBuilder {
         this.directory = directory
         return this

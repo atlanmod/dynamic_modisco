@@ -24,11 +24,6 @@
       <artifactId>NeoDisco</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.atlanmod</groupId>
-      <artifactId>NeoDisco</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>

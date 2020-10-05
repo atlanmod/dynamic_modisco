@@ -17,7 +17,6 @@ class MainTest {
 
         val codeFactory = launcher.factory.Code()
 
-
         ctClass1.methods.forEach {
             for (i in 0 until it.body.statements.size) {
                 val st = it.body.statements.get(i)
@@ -86,7 +85,7 @@ class MainTest {
     }
 
     @Test
-    fun testStInstrumentationAndRunTests() {
+    fun testStInstrumentationAndRunMain() {
         val f = File("src/test/resources/output")
         if (f.exists())
             f.deleteRecursively()
@@ -98,6 +97,7 @@ class MainTest {
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
                 .beforeStatements(SimpleTraceTracer())
+                .afterMethods(SimpleTraceTracer())
                 .build()
                 .instrument()
 

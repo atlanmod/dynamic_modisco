@@ -10,7 +10,8 @@ class TracerImpl: Tracer<Any>() {
     }
 
     override fun closure(vararg args: String): Boolean {
-        if (args[0] == "main") {
+        if (args[0] == "org.example.App#main") {
+            println("Closing")
             return true
         }
         return false

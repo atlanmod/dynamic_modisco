@@ -1,4 +1,4 @@
-package org.atlanmod
+package org.atlanmod.instrument
 
 import org.apache.commons.io.FileUtils
 import org.apache.maven.model.Dependency
@@ -18,6 +18,10 @@ import java.io.FileInputStream
 import java.io.FileWriter
 import kotlin.reflect.full.isSubclassOf
 
+/**
+ * TODO: Separate the method calls when it is a statement and a method instrumentation.
+ *          using a different method signature would work
+ */
 class Instrumenter {
     lateinit var directory: File
     lateinit var target: File
@@ -43,7 +47,7 @@ class Instrumenter {
                 override fun process(method: CtMethod<Any>?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${qualifiedName(method!!)}\")")
+                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
                         method.body?.insertBegin<CtStatementList>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)
@@ -58,7 +62,7 @@ class Instrumenter {
                 override fun process(st: CtStatement?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.column}\", \"${st?.position?.endColumn}\")")
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
                         st?.insertBefore<CtStatement>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)
@@ -72,7 +76,7 @@ class Instrumenter {
                 override fun process(method: CtMethod<Any>?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${qualifiedName(method!!)}\")")
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
                         method.body?.insertEnd<CtStatementList>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)
@@ -87,7 +91,7 @@ class Instrumenter {
                 override fun process(st: CtStatement?) {
                     try {
                         val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.column}\", \"${st?.position?.endColumn}\")")
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
                         st?.insertAfter<CtStatement>(instrumentedStatement)
                     } catch (e: Exception) {
                         println(e.message)

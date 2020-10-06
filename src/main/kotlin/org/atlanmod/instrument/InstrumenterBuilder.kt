@@ -1,4 +1,4 @@
-package org.atlanmod
+package org.atlanmod.instrument
 
 import org.atlanmod.trace.Tracer
 import java.io.File

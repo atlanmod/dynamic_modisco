@@ -1,15 +1,13 @@
 package org.atlanmod
 
-import org.atlanmod.trace.TracerImpl
+import org.atlanmod.instrument.InstrumenterBuilder
+import org.atlanmod.merge.MoDiscoMerge
+import org.atlanmod.trace.TestTracer
 import org.junit.Test
+import org.omg.smm.SmmFactory
 import spoon.Launcher
-import spoon.reflect.declaration.CtClass
-import spoon.reflect.declaration.CtElement
-import spoon.reflect.declaration.CtMethod
-import spoon.reflect.declaration.CtNamedElement
 import java.io.File
 import java.nio.file.Files
-import kotlin.reflect.full.isSubclassOf
 
 class MainTest {
 
@@ -47,7 +45,7 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeStatements(TracerImpl())
+                .beforeStatements(TestTracer())
                 .build()
                 .instrument()
     }
@@ -63,14 +61,14 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeMethods(TracerImpl())
+                .beforeMethods(TestTracer())
                 .build()
                 .instrument()
 
     }
 
     @Test
-    fun testMethInstrumentationAndRunTests() {
+    fun testMethInstrumentationAndRunMain() {
         val f = File("src/test/resources/output")
         if (f.exists())
             f.deleteRecursively()
@@ -81,7 +79,8 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeMethods(TracerImpl())
+                .beforeMethods(TestTracer())
+                .afterMethods(TestTracer())
                 .build()
                 .instrument()
 
@@ -100,12 +99,63 @@ class MainTest {
                 .onProject(File("src/test/resources/dummy"))
                 .toProject(f)
                 .withMavenDependency(File("pom.xml")) // dependency to this project
-                .beforeStatements(TracerImpl())
-                .afterMethods(TracerImpl())
+                .beforeStatements(TestTracer())
+                .afterMethods(TestTracer())
                 .build()
                 .instrument()
 
         Executer().runExec(f)
     }
+
+    @Test
+    fun testStInstrumentationRunAndMergeModels() {
+        val f = File("src/test/resources/output")
+        if (f.exists())
+            f.deleteRecursively()
+
+        f.mkdir()
+
+        InstrumenterBuilder()
+            .onProject(File("src/test/resources/dummy"))
+            .toProject(f)
+            .withMavenDependency(File("pom.xml")) // dependency to this project
+            .beforeStatements(TestTracer())
+            .afterMethods(TestTracer())
+            .build()
+            .instrument()
+
+        Executer().runExec(f)
+
+        val smmModel = File(f, "smmModel.xmi")
+        assert(smmModel.exists())
+
+        MoDiscoMerge().merge(smmModel, File(f, "dummy_java.xmi"), File(f, "java2kdmFragments"))
+    }
+
+    @Test
+    fun testMethInstrumentationRunAndMergeModels() {
+        val f = File("src/test/resources/output")
+        if (f.exists())
+            f.deleteRecursively()
+
+        f.mkdir()
+
+        InstrumenterBuilder()
+            .onProject(File("src/test/resources/dummy"))
+            .toProject(f)
+            .withMavenDependency(File("pom.xml")) // dependency to this project
+            .beforeMethods(TestTracer())
+            .afterMethods(TestTracer())
+            .build()
+            .instrument()
+
+        Executer().runExec(f)
+
+        val smmModel = File(f, "smmModel.xmi")
+        assert(smmModel.exists())
+
+        MoDiscoMerge().merge(smmModel, File(f, "dummy_java.xmi"), File(f, "java2kdmFragments"))
+    }
+
 
 }

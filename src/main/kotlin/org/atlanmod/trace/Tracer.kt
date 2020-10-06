@@ -18,19 +18,21 @@ abstract class Tracer<T> {
     companion object {
         var model = SmmFactory.eINSTANCE.createSmmModel()
         var observedMeasure: ObservedMeasure
-        var previous: Measurement? = SmmFactory.eINSTANCE.createGradeMeasurement()
+        var previous: Measurement? = SmmFactory.eINSTANCE.createDirectMeasurement()
 
         /**
          * Static initialization.
          */
         init {
+
             val observation = SmmFactory.eINSTANCE.createObservation()
-            val measure: Measure = SmmFactory.eINSTANCE.createGradeMeasure()
+            val measure: Measure = SmmFactory.eINSTANCE.createDirectMeasure()
             val lib = SmmFactory.eINSTANCE.createMeasureLibrary()
 
             observedMeasure = SmmFactory.eINSTANCE.createObservedMeasure()
             observedMeasure.measurements.add(previous)
 
+            previous?.description = "entry point;_;_"
             observation.observedMeasures.add(observedMeasure)
             lib.measureElements.add(measure)
             model.libraries.add(lib)
@@ -48,6 +50,8 @@ abstract class Tracer<T> {
             val resource = rs.createResource(URI.createURI("smmModel.xmi"))
             resource.contents.add(model)
             resource.save(Collections.EMPTY_MAP)
+
+            println("Wrote dynamic analysis model in ${URI.createURI("smmModel.xmi").toFileString()}")
         }
     }
 
@@ -56,17 +60,20 @@ abstract class Tracer<T> {
      */
     fun before(vararg args: String) {
         val measurement = createMeasurement(*args)
-        (measurement as GradeMeasurement).value = setUp().toString()
+        (measurement as DirectMeasurement).value = setUp() as Double
 
         var rs = SmmFactory.eINSTANCE.createBase1MeasurementRelationship()
         rs.name = "trace"
         rs.from = previous
         rs.to = measurement
+
+        previous?.measurementRelationships?.add(rs)
         previous = measurement
 
+        (previous as DirectMeasurement).value = setUp() as Double // need some flexibility: generic measurement with value of type T
+
         observedMeasure.measurements.add(measurement)
-        observedMeasure.inRelationships.add(rs)
-        measurement.measurementRelationships.add(rs)
+        //observedMeasure.inRelationships.add(rs)
     }
 
     /**
@@ -74,13 +81,12 @@ abstract class Tracer<T> {
      */
     fun after(vararg args: String) {
         if (previous?.description == args.joinToString(";")) // there is a before step that targeted the same element
-            (previous as GradeMeasurement).value = tearDown().toString()
+            (previous as DirectMeasurement).value = tearDown() as Double
         else {
             val measurement = createMeasurement(*args)
-            (measurement as GradeMeasurement).value = tearDown().toString()
+            (measurement as DirectMeasurement).value = tearDown() as Double
         }
 
-        observedMeasure.measurements.forEach{ println((it as GradeMeasurement).value)}
         if (closure(*args))
             close()
     }
@@ -90,7 +96,7 @@ abstract class Tracer<T> {
      * Current version provides a @GradeMeasurement, a smarter version would create a measurement depending to <T>
      */
     private fun createMeasurement(vararg args: String) : Measurement {
-        val measurement = SmmFactory.eINSTANCE.createGradeMeasurement()
+        val measurement = SmmFactory.eINSTANCE.createDirectMeasurement()
         measurement.name = args[0]
         measurement.description = args.joinToString(";")
         return measurement
@@ -99,6 +105,7 @@ abstract class Tracer<T> {
 
     /**
      * defines additional analysis to call in a before() method
+     *
      */
     abstract fun setUp(): T
 

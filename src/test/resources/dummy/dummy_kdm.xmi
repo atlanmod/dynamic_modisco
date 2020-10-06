@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ASCII"?>
+<kdm:Segment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:kdm="http://www.eclipse.org/MoDisco/kdm/kdm" xmlns:source="http://www.eclipse.org/MoDisco/kdm/source">
+  <model xsi:type="source:InventoryModel" name="dummy">
+    <inventoryElement xsi:type="source:Project" name="dummy">
+      <inventoryElement xsi:type="source:Configuration" name=".classpath" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.classpath"/>
+      <inventoryElement xsi:type="source:SourceFile" name=".gitignore" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.gitignore"/>
+      <inventoryElement xsi:type="source:Directory" name=".idea" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.idea">
+        <inventoryElement xsi:type="source:Configuration" name="workspace.xml" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.idea\workspace.xml"/>
+      </inventoryElement>
+      <inventoryElement xsi:type="source:Configuration" name=".project" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.project"/>
+      <inventoryElement xsi:type="source:Directory" name=".settings" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.settings">
+        <inventoryElement xsi:type="source:Configuration" name="org.eclipse.core.resources.prefs" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.settings\org.eclipse.core.resources.prefs"/>
+        <inventoryElement xsi:type="source:Configuration" name="org.eclipse.jdt.core.prefs" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.settings\org.eclipse.jdt.core.prefs"/>
+        <inventoryElement xsi:type="source:Configuration" name="org.eclipse.m2e.core.prefs" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\.settings\org.eclipse.m2e.core.prefs"/>
+      </inventoryElement>
+      <inventoryElement xsi:type="source:SourceFile" name="dummy_java.xmi" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\dummy_java.xmi"/>
+      <inventoryElement xsi:type="source:SourceFile" name="dummy_java2kdm.xmi" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\dummy_java2kdm.xmi"/>
+      <inventoryElement xsi:type="source:SourceFile" name="dummy_kdm.xmi" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\dummy_kdm.xmi"/>
+      <inventoryElement xsi:type="source:Directory" name="java2kdmFragments" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\java2kdmFragments">
+        <inventoryElement xsi:type="source:SourceFile" name="org.example_java2kdm.xmi" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\java2kdmFragments\org.example_java2kdm.xmi"/>
+        <inventoryElement xsi:type="source:SourceFile" name="Package2Directory_java2kdm.xmi" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\java2kdmFragments\Package2Directory_java2kdm.xmi"/>
+      </inventoryElement>
+      <inventoryElement xsi:type="source:Configuration" name="pom.xml" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\pom.xml"/>
+      <inventoryElement xsi:type="source:BinaryFile" name="spoon.classpath.tmp" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\spoon.classpath.tmp"/>
+      <inventoryElement xsi:type="source:Directory" name="src" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src">
+        <inventoryElement xsi:type="source:Directory" name="main" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main">
+          <inventoryElement xsi:type="source:Directory" name="java" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\java">
+            <inventoryElement xsi:type="source:Directory" name="org" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\java\org">
+              <inventoryElement xsi:type="source:Directory" name="example" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\java\org\example">
+                <inventoryElement xsi:type="source:SourceFile" name="App.java" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\java\org\example\App.java"/>
+                <inventoryElement xsi:type="source:SourceFile" name="App2.java" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\java\org\example\App2.java"/>
+              </inventoryElement>
+            </inventoryElement>
+          </inventoryElement>
+          <inventoryElement xsi:type="source:Directory" name="resources" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\resources">
+            <inventoryElement xsi:type="source:SourceFile" name="dependency.txt" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\src\main\resources\dependency.txt"/>
+          </inventoryElement>
+        </inventoryElement>
+      </inventoryElement>
+      <inventoryElement xsi:type="source:Directory" name="target" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target">
+        <inventoryElement xsi:type="source:Directory" name="classes" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes">
+          <inventoryElement xsi:type="source:SourceFile" name="dependency.txt" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes\dependency.txt"/>
+          <inventoryElement xsi:type="source:Directory" name="org" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes\org">
+            <inventoryElement xsi:type="source:Directory" name="example" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes\org\example">
+              <inventoryElement xsi:type="source:BinaryFile" name="App.class" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes\org\example\App.class"/>
+              <inventoryElement xsi:type="source:BinaryFile" name="App2.class" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\classes\org\example\App2.class"/>
+            </inventoryElement>
+          </inventoryElement>
+        </inventoryElement>
+        <inventoryElement xsi:type="source:Directory" name="generated-sources" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\generated-sources">
+          <inventoryElement xsi:type="source:Directory" name="annotations" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\generated-sources\annotations"/>
+        </inventoryElement>
+        <inventoryElement xsi:type="source:Directory" name="test-classes" path="C:\Users\33667\Documents\work\implementations\neodisco\src\test\resources\dummy\target\test-classes"/>
+      </inventoryElement>
+    </inventoryElement>
+  </model>
+</kdm:Segment>

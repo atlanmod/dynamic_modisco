@@ -8,6 +8,7 @@ import org.atlanmod.trace.Tracer
 import spoon.Launcher
 import spoon.MavenLauncher
 import spoon.processing.AbstractProcessor
+import spoon.reflect.code.CtReturn
 import spoon.reflect.code.CtStatement
 import spoon.reflect.code.CtStatementList
 import spoon.reflect.declaration.CtClass
@@ -16,6 +17,8 @@ import spoon.reflect.declaration.CtNamedElement
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileWriter
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlin.reflect.full.isSubclassOf
 
 /**
@@ -23,6 +26,8 @@ import kotlin.reflect.full.isSubclassOf
  *          using a different method signature would work
  */
 class Instrumenter {
+    val logger = Logger.getLogger(Instrumenter::class.qualifiedName)
+
     lateinit var directory: File
     lateinit var target: File
     var beforeMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
@@ -33,72 +38,8 @@ class Instrumenter {
 
     fun instrument() {
         FileUtils.copyDirectory(directory, target)
-        val srcDestination = File(target.absolutePath, "src/main/java")
+        var srcDestination = File(target.absolutePath, "src/")
         val pom = File(target.absolutePath, "pom.xml")
-        val launcher: Launcher = MavenLauncher(directory.absolutePath, MavenLauncher.SOURCE_TYPE.ALL_SOURCE)
-
-        launcher.environment.setShouldCompile(false) // we compile later with maven
-        launcher.environment.isAutoImports = true
-        launcher.environment.isCopyResources = true
-        launcher.setSourceOutputDirectory(srcDestination.absolutePath)
-
-        beforeMethodProcessors.forEach {
-            launcher.addProcessor(object: AbstractProcessor<CtMethod<Any>>() {
-                override fun process(method: CtMethod<Any>?) {
-                    try {
-                        val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
-                        method.body?.insertBegin<CtStatementList>(instrumentedStatement)
-                    } catch (e: Exception) {
-                        println(e.message)
-                        println("Could not instrument ${method?.simpleName}")
-                    }
-                }
-            })
-        }
-
-        beforeStatementProcessors.forEach {
-            launcher.addProcessor(object: AbstractProcessor<CtStatement>() {
-                override fun process(st: CtStatement?) {
-                    try {
-                        val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
-                        st?.insertBefore<CtStatement>(instrumentedStatement)
-                    } catch (e: Exception) {
-                        println(e.message)
-                    }
-                }
-            })
-        }
-
-        afterMethodProcessors.forEach {
-            launcher.addProcessor(object: AbstractProcessor<CtMethod<Any>>() {
-                override fun process(method: CtMethod<Any>?) {
-                    try {
-                        val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
-                        method.body?.insertEnd<CtStatementList>(instrumentedStatement)
-                    } catch (e: Exception) {
-                        println(e.message)
-                        println("Could not instrument ${method?.simpleName}")
-                    }
-                }
-            })
-        }
-
-        afterStatementProcessors.forEach {
-            launcher.addProcessor(object: AbstractProcessor<CtStatement>() {
-                override fun process(st: CtStatement?) {
-                    try {
-                        val codeFactory = Launcher().factory.Code()
-                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
-                        st?.insertAfter<CtStatement>(instrumentedStatement)
-                    } catch (e: Exception) {
-                        println(e.message)
-                    }
-                }
-            })
-        }
 
         dependencies.forEach {
             val model = MavenXpp3Reader().read(FileInputStream(pom))
@@ -114,7 +55,9 @@ class Instrumenter {
             MavenXpp3Writer().write(FileWriter(pom), model)
         }
 
-        launcher.run()
+        configureLauncher(MavenLauncher.SOURCE_TYPE.APP_SOURCE, File(target.absolutePath, "/src/main/java").absolutePath).run()
+        configureLauncher(MavenLauncher.SOURCE_TYPE.TEST_SOURCE, File(target.absolutePath, "/src/test/java").absolutePath).run()
+
     }
 
 
@@ -127,5 +70,75 @@ class Instrumenter {
             elem::class.isSubclassOf(CtClass::class) -> (elem as CtClass<*>).qualifiedName
             else -> ""
         }
+    }
+
+    private fun configureLauncher(type: MavenLauncher.SOURCE_TYPE, outputDirectory: String): Launcher {
+        val launcher: Launcher = MavenLauncher(directory.absolutePath, type)
+
+        launcher.environment.setShouldCompile(false) // we compile later with maven
+        launcher.environment.isAutoImports = true
+        launcher.environment.isCopyResources = true
+        launcher.setSourceOutputDirectory(outputDirectory)
+
+        beforeMethodProcessors.forEach {
+            launcher.addProcessor(object: AbstractProcessor<CtMethod<Any>>() {
+                override fun process(method: CtMethod<Any>?) {
+                    try {
+                        val codeFactory = Launcher().factory.Code()
+                        val instrumentedStatement: CtStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
+                        method.body?.insertBegin<CtStatementList>(instrumentedStatement)
+                    } catch (e: Exception) {
+                        logger.log(Level.FINE, "Error instrumenting method $method", e)
+                    }
+                }
+            })
+        }
+
+        beforeStatementProcessors.forEach {
+            launcher.addProcessor(object: AbstractProcessor<CtStatement>() {
+                override fun process(st: CtStatement?) {
+                    try {
+                        val codeFactory = Launcher().factory.Code()
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().before(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
+                        st?.insertBefore<CtStatement>(instrumentedStatement)
+                    } catch (e: Exception) {
+                        logger.log(Level.FINE, "Error instrumenting statement $st", e)
+                    }
+                }
+            })
+        }
+
+        afterMethodProcessors.forEach {
+            launcher.addProcessor(object: AbstractProcessor<CtMethod<Any>>() {
+                override fun process(method: CtMethod<Any>?) {
+                    try {
+                        val codeFactory = Launcher().factory.Code()
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${method?.position?.compilationUnit?.file?.name}\",\"${qualifiedName(method!!)}\",\"${method.signature}\")")
+                        if (method.body?.statements?.last() is CtReturn<*>) { // If the method finishes with a return, inserting a statement after would make it unreachable
+                            method.body?.statements?.last()?.insertBefore<CtStatement>(instrumentedStatement)
+                        } else
+                            method.body?.insertEnd<CtStatementList>(instrumentedStatement)
+                    } catch (e: Exception) {
+                        logger.log(Level.FINE, "Error instrumenting method $method", e)
+                    }
+                }
+            })
+        }
+
+        afterStatementProcessors.forEach {
+            launcher.addProcessor(object: AbstractProcessor<CtStatement>() {
+                override fun process(st: CtStatement?) {
+                    try {
+                        val codeFactory = Launcher().factory.Code()
+                        val instrumentedStatement = codeFactory.createCodeSnippetStatement("new ${it::class.qualifiedName}().after(\"${st?.position?.compilationUnit?.file?.name}\",\"${st?.position?.sourceStart}\", \"${st?.position?.sourceEnd}\")")
+                        st?.insertAfter<CtStatement>(instrumentedStatement)
+                    } catch (e: Exception) {
+                        logger.log(Level.FINE, "Error instrumenting statement $st", e)
+                    }
+                }
+            })
+        }
+
+        return launcher
     }
 }

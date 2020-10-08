@@ -7,10 +7,10 @@ class InstrumenterBuilder {
     private var instrumenter : Instrumenter = Instrumenter()
     private lateinit var directory: File
     private lateinit var target: File
-    var beforeMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
-    var beforeStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
-    var afterMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
-    var afterStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    private var beforeMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    private var beforeStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    private var afterMethodProcessors : ArrayList<Tracer<Any>> = ArrayList()
+    private var afterStatementProcessors : ArrayList<Tracer<Any>> = ArrayList()
     private val dependencies : ArrayList<File> = ArrayList()
 
     fun onProject(directory: File) : InstrumenterBuilder {

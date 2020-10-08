@@ -25,7 +25,7 @@ class Executer {
     }
 
     fun runTests(directory: File) {
-        runWithGoals(directory, "clean", "compile", "test")
+        runWithGoals(directory, "clean", "compile", "test-compile", "test")
     }
 
     fun runExec(directory: File) {

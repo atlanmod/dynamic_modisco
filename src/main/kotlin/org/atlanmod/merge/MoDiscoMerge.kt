@@ -2,13 +2,15 @@ package org.atlanmod.merge
 
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.eclipse.gmt.modisco.java.*
 import org.eclipse.gmt.modisco.java.emf.JavaPackage
-import org.eclipse.jdt.core.dom.Name
-import org.eclipse.jdt.core.dom.PackageDeclaration
+import org.eclipse.gmt.modisco.java.emf.impl.BlockImpl
+import org.eclipse.gmt.modisco.omg.kdm.kdm.KdmPackage
+import org.eclipse.gmt.modisco.omg.kdm.source.SourcePackage
 import org.eclipse.modisco.java.composition.javaapplication.Java2File
 import org.eclipse.modisco.java.composition.javaapplication.JavaapplicationPackage
 import org.omg.smm.Measurement
@@ -23,7 +25,10 @@ class MoDiscoMerge {
     private val java2files = ArrayList<Java2File>()
 
     fun merge(smm: File, modiscoModel: File, fragments: File) {
+        EPackage.Registry.INSTANCE["http://www.eclipse.org/MoDisco/kdm/source"] = SourcePackage.eINSTANCE
         JavaPackage.eINSTANCE.eClass()
+        KdmPackage.eINSTANCE.eClass()
+        SourcePackage.eINSTANCE.eClass()
         JavaapplicationPackage.eINSTANCE.eClass()
         SmmPackage.eINSTANCE.eClass()
 
@@ -53,13 +58,28 @@ class MoDiscoMerge {
         }
 
         smm.eResource().save(Collections.EMPTY_MAP)
-        displayTrace(smm)
+        //displayTrace(smm)
     }
 
+    /**
+     * Get all statements in compilation unit
+     * find the statement with the position that matches the looked statement the most with the following algorithm:
+     * let product = startColumn * endColumn
+     * for st in statements
+     * find the statement where: absolute value of (st.startColumn * st.endColumn / product - 1) is minimum
+     *
+     * this might be improved for bigger structures, maybe considering each statement as a point in a plan,
+     * and computing the distance with (0,0) and finding the closest one to the statement looked for
+     * anyway, this will do.
+     */
     private fun lookForStatement(unit: String, start: Int, end: Int) : Statement? {
+
         val file = java2files.find { it.javaUnit.name == unit }
-        // MoDisco's end column is smaller than spoon's by 1.
-        return file?.children?.filter { it.node is Statement }?.find { it.startPosition == start && it.endPosition == end+1 }?.node as Statement
+
+        return file?.children
+                ?.filter { it.node is Statement && !it.node::class.isSubclassOf(Block::class)}
+                ?.map { it -> Pair(Math.abs(((it.startPosition * it.endPosition) / (start * end))-1).toDouble(), it) }
+                ?.reduce{ acc, pair -> if (acc.first > pair.first) pair else acc }?.second?.node as Statement
     }
 
     private fun lookForMethod(unit: String, qualifiedName: String, signature: String): MethodDeclaration? {
